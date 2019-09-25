@@ -1,0 +1,10 @@
+---
+# handlers file for icinga
+- name: Restart Icinga
+  service:
+    name: icinga2
+    state: restarted
+- name: Reload Icinga
+  service:
+    name: icinga2
+    state: reloaded

@@ -1,0 +1,22 @@
+---
+- name: enable EPEL repository
+  package:
+    name: epel-release
+  when: icinga_manage_epel | bool
+- name: icinga repository
+  yum_repository:
+    name: icinga-release
+    description: Icinga Release
+    file: icinga-release
+    baseurl: http://packages.icinga.org/epel/$releasever/release/
+    gpgcheck: yes
+    gpgkey: http://packages.icinga.org/icinga.key
+  when: icinga_manage_repository | bool
+- name: install icinga
+  package:
+    name: icinga2
+- name: install icinga 2 selinux policy
+  yum:
+    name: icinga2-selinux
+  when: ansible_distribution_major_version > "6"
+

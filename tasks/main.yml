@@ -1,0 +1,12 @@
+---
+# tasks file for icinga
+- group_by:
+    key: os_{{ ansible_os_family|lower }}{{ ansible_distribution_major_version }}
+  when: ansible_system|lower == 'linux' or ansible_system|lower == 'darwin'
+- group_by:
+    key: os_{{ ansible_os_family|lower }}{{ ansible_distribution_version }}
+  when: ansible_system|lower == 'sunos'
+- import_tasks: linux.yml
+  when: ansible_system|lower == 'linux'
+- import_tasks: master.yml
+  when: ansible_hostname == icinga_configmaster or ansible_hostname == icinga_master 
