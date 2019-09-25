@@ -1,0 +1,24 @@
+[icingaweb_db]
+type = "db"
+db = "mysql"
+host = "127.0.0.1"
+port = "3306"
+dbname = "icingaweb"
+username = "icingaweb"
+password = "{{ icinga_web_db_password }}"
+charset = ""
+persistent = "0"
+use_ssl = "0"
+
+[icinga_ido]
+type = "db"
+db = "mysql"
+host = "127.0.0.1"
+port = ""
+dbname = "icinga"
+username = "icinga"
+password = "{{ icinga_ido_password }}"
+charset = ""
+persistent = "0"
+use_ssl = "0"
+

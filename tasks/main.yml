@@ -19,3 +19,5 @@
   when: icinga_manage_config | bool
   notify:
     - Restart Icinga
+- import_tasks: icingaweb.yml
+  when: ansible_hostname == icinga_configmaster or ansible_hostname == icinga_master 

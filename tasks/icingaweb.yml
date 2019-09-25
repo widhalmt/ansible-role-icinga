@@ -1,0 +1,127 @@
+---
+- name: Enable CentOS SCL
+  package:
+    name: centos-release-scl
+  when: ansible_distribution | lower == "centos"
+- name: Install Icinga Web
+  package:
+    name: 
+      - httpd
+      - mod_ssl
+      - icingaweb2
+      - icingacli
+- name: Install Icinga Web SELinux Conf
+  package:
+    name: icingaweb2-selinux
+- name: Configure Icinga Web config
+  template:
+    src: web-config.ini.j2
+    dest: /etc/icingaweb2/config.ini
+    owner: "{{ icinga_apache_user }}"
+    group: "{{ icinga_web_group }}"
+    mode: 0660
+- name: Configure Icinga Web authentication
+  template:
+    src: web-authentication.ini.j2
+    dest: /etc/icingaweb2/authentication.ini
+    owner: "{{ icinga_apache_user }}"
+    group: "{{ icinga_web_group }}"
+    mode: 0660
+- name: Configure Icinga Web resources
+  template:
+    src: web-resources.ini.j2
+    dest: /etc/icingaweb2/resources.ini
+    owner: "{{ icinga_apache_user }}"
+    group: "{{ icinga_web_group }}"
+    mode: 0660
+- name: Configure Icinga Web roles
+  template:
+    src: web-roles.ini.j2
+    dest: /etc/icingaweb2/roles.ini
+    owner: "{{ icinga_apache_user }}"
+    group: "{{ icinga_web_group }}"
+    mode: 0660
+- name: Configure Icinga Web groups
+  template:
+    src: web-groups.ini.j2
+    dest: /etc/icingaweb2/groups.ini
+    owner: "{{ icinga_apache_user }}"
+    group: "{{ icinga_web_group }}"
+    mode: 0660
+- name: Create Icinga Web Monitoring config directory
+  file:
+    path: /etc/icingaweb2/modules/monitoring/
+    state: directory
+    owner: "{{ icinga_apache_user }}"
+    group: "{{ icinga_web_group }}"
+    mode: 2770
+- name: Confiugure Icinga Web Monitoring config
+  template:
+    src: monitoring-config.ini.j2
+    dest: /etc/icingaweb2/modules/monitoring/config.ini
+    owner: "{{ icinga_apache_user }}"
+    group: "{{ icinga_web_group }}"
+    mode: 0660
+- name: Confiugure Icinga Web Monitoring backends
+  template:
+    src: monitoring-backends.ini.j2
+    dest: /etc/icingaweb2/modules/monitoring/backends.ini
+    owner: "{{ icinga_apache_user }}"
+    group: "{{ icinga_web_group }}"
+    mode: 0660
+- name: Confiugure Icinga Web Monitoring commandtransports
+  template:
+    src: monitoring-commandtransports.ini.j2
+    dest: /etc/icingaweb2/modules/monitoring/commandtransports.ini
+    owner: "{{ icinga_apache_user }}"
+    group: "{{ icinga_web_group }}"
+    mode: 0660
+- name: Allow Apache to connect via SELinux
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes
+- name: Start FPM
+  service:
+    name: rh-php71-php-fpm
+    state: started
+    enabled: yes
+- name: Start Apache
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+- name: Check for icingaweb database schema
+  shell: mysql icingaweb -e 'SHOW TABLES' | wc -l
+  register: dbstatus
+  changed_when: False
+- name: Import Icinga Web Schema
+  mysql_db:
+    name: icingaweb
+    state: import
+    target: /usr/share/doc/icingaweb2/schema/mysql.schema.sql
+  when: dbstatus.stdout == "0"
+- name: calculate password of inital Icinga Web user
+  command: openssl passwd -1 {{ icinga_web_user_password }}
+  register: icinga_web_password_hash
+  changed_when: False
+- name: Check for icingaweb initial user
+  shell: mysql icingaweb -e "SELECT * FROM icingaweb_user WHERE name = 'icingaadmin'" | wc -l
+  register: webuserstatus
+  changed_when: False
+- name: create initial User for Icinga Web
+  command: mysql icingaweb -e "INSERT INTO icingaweb_user (name, active, password_hash) VALUES ('icingaadmin', 1, '{{ icinga_web_password_hash.stdout }}')"
+  when: webuserstatus.stdout == "0"
+  #- name: Check permissions on enabled modules directory
+  #  file:
+  #    path: /etc/icingaweb2/enabledModules
+  #    state: directory
+  #    owner: "{{ icinga_apache_user }}"
+  #    group: "{{ icinga_web_group }}"
+  #    mode: 2750
+  #  tags:
+  #    - new
+- name: Enable Icinga Web monitoring module
+  command: icingacli module enable monitoring
+  args:
+    creates: /etc/icingaweb2/enabledModules/monitoring

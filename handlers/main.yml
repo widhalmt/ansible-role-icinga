@@ -13,3 +13,4 @@
     name: icinga
     state: import
     target: /usr/share/icinga2-ido-mysql/schema/mysql.sql
+

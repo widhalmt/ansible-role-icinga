@@ -30,3 +30,8 @@
   command: restorecon -irv /usr/src/justintime-monitoring-plugins/check_mem
   changed_when: False
   when: icinga_manage_plugins | bool and ansible_os_family|lower == 'redhat'
+- name: Start Icinga
+  service:
+    name: icinga2
+    state: started
+    enabled: yes

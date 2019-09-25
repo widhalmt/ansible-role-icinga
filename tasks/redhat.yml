@@ -28,4 +28,6 @@
       - nagios-plugins-swap
       - nagios-plugins-users
       - nagios-plugins-ntp
+      - nagios-plugins-ping
+      - nagios-plugins-icmp
   when: icinga_manage_plugins | bool

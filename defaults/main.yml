@@ -8,4 +8,9 @@ icinga_manage_repository: true
 icinga_manage_config: true
 icinga_manage_plugins: true
 icinga_ido_password: PleaseChangeMe-Icinga
+icinga_web_db_password: PleaseChangeMe-Web
 icinga_ticketsalt: bd051f11074e2388980481ce0dbd3d76
+icinga_web_user_password: InitialWeb
+icinga_apache_user: apache
+icinga_web_group: icingaweb2
+icinga_api_password: 83981bggbbsdg79a
