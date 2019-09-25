@@ -1,0 +1,31 @@
+---
+- name: Install MySQL IDO package
+  package:
+    name: icinga2-ido-mysql
+  notify:
+    - Import IDO MySQL schema
+- name: Configure IDO connection
+  template:
+    src: ido-mysql.conf.j2
+    dest: /etc/icinga2/features-available/ido-mysql.conf
+    owner: root
+    group: icinga
+    mode: 0640
+  notify:
+    - Restart Icinga
+- name: Enable IDO feature
+  command: icinga2 feature enable ido-mysql
+  args:
+    creates: /etc/icinga2/features-enabled/ido-mysql.conf
+  notify:
+    - Restart Icinga
+- name: Configure zones.conf on masters
+  template:
+    src: master-zones.conf.j2
+    dest: /etc/icinga2/zones.conf
+    owner: root
+    group: "{{ icinga_group }}"
+    mode: 0640
+  notify:
+    - Reload Icinga
+  when: icinga_manage_config | bool

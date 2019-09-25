@@ -8,3 +8,8 @@
   service:
     name: icinga2
     state: reloaded
+- name: Import IDO MySQL schema
+  mysql_db:
+    name: icinga
+    state: import
+    target: /usr/share/icinga2-ido-mysql/schema/mysql.sql

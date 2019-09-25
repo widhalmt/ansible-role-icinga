@@ -1,0 +1,70 @@
+---
+- name: create Icinga CA
+  command: icinga2 pki new-ca
+  args:
+    creates: /var/lib/icinga2/ca/ca.key
+  notify:
+    - Restart Icinga
+- name: create certificate for Master
+  command: icinga2 pki new-cert --cn={{ ansible_fqdn }} --key=/var/lib/icinga2/certs/{{ ansible_fqdn }}.key --csr=/var/lib/icinga2/certs/{{ ansible_fqdn }}.csr
+  args:
+    creates: /var/lib/icinga2/certs/{{ ansible_fqdn }}.key
+  notify:
+    - Restart Icinga
+- name: sign certificate for Master
+  command: icinga2 pki sign-csr --csr=/var/lib/icinga2/certs/{{ ansible_fqdn }}.csr --cert=/var/lib/icinga2/certs/{{ ansible_fqdn }}.crt
+  args:
+    creates: /var/lib/icinga2/certs/{{ ansible_fqdn }}.crt
+  notify:
+    - Restart Icinga
+- name: copy CA certificate on master
+  command: install -o {{ icinga_user }} -g {{ icinga_group }} -m644 /var/lib/icinga2/ca/ca.crt /var/lib/icinga2/certs/
+  args:
+    creates: /var/lib/icinga2/certs/ca.crt
+  notify:
+    - Restart Icinga
+- name: create ansible directory for master zone
+  file:
+    state: directory
+    path: /etc/icinga2/zones.d/master/ansible
+    owner: root
+    group: icinga
+    mode: 0750
+  when: icinga_manage_config | bool
+- name: create ansible directory for global-templates zone
+  file:
+    state: directory
+    path: /etc/icinga2/zones.d/global-templates/ansible
+    owner: root
+    group: icinga
+    mode: 0750
+  when: icinga_manage_config | bool
+- name: create ansible directory for satellite-templates zone
+  file:
+    state: directory
+    path: /etc/icinga2/zones.d/satellite-templates/ansible
+    owner: root
+    group: icinga
+    mode: 0750
+  when: icinga_manage_config | bool
+- name: Place global templates
+  copy:
+    src: global-templates.conf
+    dest: /etc/icinga2/zones.d/global-templates/ansible
+    owner: root
+    group: "{{ icinga_group }}"
+    mode: 0640
+  when: icinga_manage_config | bool
+  notify:
+    - Reload Icinga
+- name: Add master hosts
+  template:
+    src: host-noagent.conf.j2
+    dest: /etc/icinga2/zones.d/master/ansible/{{ hostvars[item].ansible_fqdn }}.conf
+    owner: root
+    group: icinga
+    mode: 0640 
+  with_items: "{{ groups['icinga_configmaster'] }}"
+  when: icinga_manage_config | bool
+  notify:
+    - Reload Icinga

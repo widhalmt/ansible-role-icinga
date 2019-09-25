@@ -10,3 +10,12 @@
   when: ansible_system|lower == 'linux'
 - import_tasks: master.yml
   when: ansible_hostname == icinga_configmaster or ansible_hostname == icinga_master 
+- import_tasks: configmaster.yml
+  when: ansible_hostname == icinga_configmaster
+- name: Enable API feature
+  command: icinga2 feature enable api
+  args:
+    creates: /etc/icinga2/features-enabled/api.conf
+  when: icinga_manage_config | bool
+  notify:
+    - Restart Icinga

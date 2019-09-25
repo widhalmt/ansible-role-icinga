@@ -1,4 +1,0 @@
----
-- name: Install MySQL IDO package
-  package:
-    name: icinga2-ido-mysql
