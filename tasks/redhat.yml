@@ -19,4 +19,13 @@
   yum:
     name: icinga2-selinux
   when: ansible_distribution_major_version > "6"
-
+- name: Install RedHat plugins
+  package:
+    name:
+      - nagios-plugins-procs
+      - nagios-plugins-load
+      - nagios-plugins-disk
+      - nagios-plugins-swap
+      - nagios-plugins-users
+      - nagios-plugins-ntp
+  when: icinga_manage_plugins | bool

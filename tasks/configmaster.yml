@@ -57,6 +57,26 @@
   when: icinga_manage_config | bool
   notify:
     - Reload Icinga
+- name: Place global dependencies
+  copy:
+    src: global-dependencies.conf
+    dest: /etc/icinga2/zones.d/global-templates/ansible
+    owner: root
+    group: "{{ icinga_group }}"
+    mode: 0640
+  when: icinga_manage_config | bool
+  notify:
+    - Reload Icinga
+- name: Place standard services
+  copy:
+    src: satellite-services.conf
+    dest: /etc/icinga2/zones.d/satellite-templates/ansible
+    owner: root
+    group: "{{ icinga_group }}"
+    mode: 0640
+  when: icinga_manage_config | bool
+  notify:
+    - Reload Icinga
 - name: Add master hosts
   template:
     src: host-noagent.conf.j2

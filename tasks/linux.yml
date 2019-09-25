@@ -11,4 +11,22 @@
   when: icinga_manage_config | bool
   notify:
     - Restart Icinga
-
+- name: Install git
+  package:
+    name: git
+  when: icinga_manage_plugins | bool
+- name: clone check_mem git_repository
+  git:
+    repo: https://github.com/justintime/nagios-plugins.git
+    dest: /usr/src/justintime-monitoring-plugins
+  when: icinga_manage_plugins | bool
+- name: set SELinux context of check_mem
+  sefcontext:
+    target: /usr/src/justintime-monitoring-plugins/check_mem/check_mem.pl
+    setype: nagios_unconfined_plugin_exec_t
+    state: present
+  when: icinga_manage_plugins | bool and ansible_os_family|lower == 'redhat'
+- name: reset selinux context of check_mem
+  command: restorecon -irv /usr/src/justintime-monitoring-plugins/check_mem
+  changed_when: False
+  when: icinga_manage_plugins | bool and ansible_os_family|lower == 'redhat'

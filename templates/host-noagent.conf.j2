@@ -1,4 +1,4 @@
-object Host "{{ item }}" {
+object Host "{{ hostvars[item].ansible_fqdn }}" {
   import "{{ hostvars[item].ansible_system|lower }}-host"
   address = "{{ hostvars[item].ansible_default_ipv4.address }}"
 {% for var in hostvars[item].group_names %}
