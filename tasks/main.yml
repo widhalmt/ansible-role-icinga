@@ -9,9 +9,9 @@
 - import_tasks: linux.yml
   when: ansible_system|lower == 'linux'
 - import_tasks: master.yml
-  when: ansible_hostname == icinga_configmaster or ansible_hostname == icinga_master 
+  when: "'icinga_master' in group_names"
 - import_tasks: configmaster.yml
-  when: ansible_hostname == icinga_configmaster
+  when: "'icinga_configmaster' in group_names"
 - name: Enable API feature
   command: icinga2 feature enable api
   args:
@@ -20,4 +20,4 @@
   notify:
     - Restart Icinga
 - import_tasks: icingaweb.yml
-  when: ansible_hostname == icinga_configmaster or ansible_hostname == icinga_master 
+  when: "'icinga_master' in group_names"
