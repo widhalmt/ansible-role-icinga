@@ -19,13 +19,3 @@
     creates: /etc/icinga2/features-enabled/ido-mysql.conf
   notify:
     - Restart Icinga
-- name: Configure zones.conf on masters
-  template:
-    src: master-zones.conf.j2
-    dest: /etc/icinga2/zones.conf
-    owner: root
-    group: "{{ icinga_group }}"
-    mode: 0640
-  notify:
-    - Reload Icinga
-  when: icinga_manage_config | bool

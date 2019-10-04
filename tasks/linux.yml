@@ -30,6 +30,16 @@
   command: restorecon -irv /usr/src/justintime-monitoring-plugins/check_mem
   changed_when: False
   when: icinga_manage_plugins | bool and ansible_os_family|lower == 'redhat'
+- name: Configure zones.conf
+  template:
+    src: zones.conf.j2
+    dest: /etc/icinga2/zones.conf
+    owner: root
+    group: "{{ icinga_group }}"
+    mode: 0640
+  notify:
+    - Reload Icinga
+  when: icinga_manage_config | bool
 - name: Start Icinga
   service:
     name: icinga2

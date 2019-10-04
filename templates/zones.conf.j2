@@ -1,0 +1,43 @@
+object Endpoint "{{ ansible_fqdn }}" {
+}
+
+{% if icinga_peer is defined %}
+object Endpoint "{{ hostvars[icinga_peer].ansible_fqdn }}" {
+  host = "{{ hostvars[icinga_peer].ansible_default_ipv4.address }}"
+}
+{% endif %}
+
+{% if icinga_zone is defined %}
+object Zone "{{ icinga_zone }}" {
+  endpoints = [ "{{ ansible_fqdn }}"{% if icinga_peer is defined %},"{{ hostvars[icinga_peer].ansible_fqdn }}"{% endif %} ]
+}
+{% else %}
+object Zone "{{ ansible_fqdn }}" {
+  endpoints = [ "{{ ansible_fqdn }}"{% if icinga_peer is defined %},"{{ hostvars[icinga_peer].ansible_fqdn }}"{% endif %} ]
+}
+{% endif %}
+
+{% if not "icinga_master" in group_names %}
+object Zone "{{ icinga_parent_zone }}" {
+  endpoints = [ {% for host in icinga_parents %}
+"{{ hostvars[host].ansible_fqdn }}"
+{%- if loop.first %},{% endif %}
+{% endfor %} ]
+  parent = {{ icinga_parent_zone }}
+}
+
+{% for parent in icinga_parents %}
+object Endpoint "{{ hostvars[parent].ansible_fqdn }}" {
+  host = "{{ hostvars[parent].ansible_default_ipv4.address }}"
+}
+
+{% endfor %}
+{% endif %}
+
+object Zone "global-templates" {
+  global = true
+}
+
+object Zone "satellite-templates" {
+  global = true
+}
