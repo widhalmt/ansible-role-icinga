@@ -8,6 +8,8 @@
     name: 
       - icingaweb2
       - icingacli
+  notify:
+    - restart apache
 - name: Install Icinga Web SELinux Conf
   package:
     name: icingaweb2-selinux
@@ -53,21 +55,21 @@
     owner: "{{ icinga_apache_user }}"
     group: "{{ icinga_web_group }}"
     mode: 2770
-- name: Confiugure Icinga Web Monitoring config
+- name: Configure Icinga Web Monitoring config
   template:
     src: monitoring-config.ini.j2
     dest: /etc/icingaweb2/modules/monitoring/config.ini
     owner: "{{ icinga_apache_user }}"
     group: "{{ icinga_web_group }}"
     mode: 0660
-- name: Confiugure Icinga Web Monitoring backends
+- name: Configure Icinga Web Monitoring backends
   template:
     src: monitoring-backends.ini.j2
     dest: /etc/icingaweb2/modules/monitoring/backends.ini
     owner: "{{ icinga_apache_user }}"
     group: "{{ icinga_web_group }}"
     mode: 0660
-- name: Confiugure Icinga Web Monitoring commandtransports
+- name: Configure Icinga Web Monitoring commandtransports
   template:
     src: monitoring-commandtransports.ini.j2
     dest: /etc/icingaweb2/modules/monitoring/commandtransports.ini
@@ -82,11 +84,6 @@
 - name: Start FPM
   service:
     name: rh-php71-php-fpm
-    state: started
-    enabled: yes
-- name: Start Apache
-  service:
-    name: httpd
     state: started
     enabled: yes
 - name: Check for icingaweb database schema
