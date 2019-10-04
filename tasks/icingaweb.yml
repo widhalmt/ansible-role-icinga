@@ -6,8 +6,6 @@
 - name: Install Icinga Web
   package:
     name: 
-      - httpd
-      - mod_ssl
       - icingaweb2
       - icingacli
 - name: Install Icinga Web SELinux Conf
