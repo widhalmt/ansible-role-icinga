@@ -1,0 +1,21 @@
+---
+- name: Install Icinga director
+  git:
+    repo: https://github.com/Icinga/icingaweb2-module-director.git
+    dest: /usr/share/icingaweb2/modules/director
+    version: "{{ icinga_director_version }}"
+- name: Install IPL
+  git:
+    repo: https://github.com/Icinga/icingaweb2-module-ipl.git
+    dest: /usr/share/icingaweb2/modules/ipl
+    version: "{{ icinga_ipl_version }}"
+- name: Install Reactbundle
+  git:
+    repo: https://github.com/Icinga/icingaweb2-module-reactbundle.git
+    dest: /usr/share/icingaweb2/modules/reactbundle
+    version: "{{ icinga_reactbundle_version }}"
+- name: Install Incubator
+  git:
+    repo: https://github.com/Icinga/icingaweb2-module-incubator.git
+    dest: /usr/share/icingaweb2/modules/incubator
+    version: "{{ icinga_incubator_version }}"

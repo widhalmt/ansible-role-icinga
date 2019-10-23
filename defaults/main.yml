@@ -1,5 +1,11 @@
 ---
 # defaults file for icinga
+#
+# versions of Icinga Web 2 modules
+icinga_director_version: v1.7.1
+icinga_ipl_version: v0.4.0
+icinga_reactbundle_version: v0.7.0
+icinga_incubator_version: v0.5.0
 icinga_user: icinga
 icinga_group: icinga
 icinga_plugindir: /usr/lib64/nagios/plugins
@@ -9,8 +15,10 @@ icinga_manage_config: true
 icinga_manage_plugins: true
 icinga_ido_password: PleaseChangeMe-Icinga
 icinga_web_db_password: PleaseChangeMe-Web
+icinga_director_password: PleaseChangeMe-Director
 icinga_ticketsalt: bd051f11074e2388980481ce0dbd3d76
 icinga_web_user_password: InitialWeb
 icinga_apache_user: apache
 icinga_web_group: icingaweb2
 icinga_api_password: 83981bggbbsdg79a
+icinga_director: true
