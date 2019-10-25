@@ -120,3 +120,5 @@
   command: icingacli module enable monitoring
   args:
     creates: /etc/icingaweb2/enabledModules/monitoring
+- import_tasks: director.yml
+  when: icinga_director | bool and 'icinga_configmaster' in group_names

@@ -1,5 +1,10 @@
 ---
-- name: Install Icinga director
+- name: Install Director dependencies
+  package:
+    name:
+      - rh-php71-php-process
+  when: ansible_os_family|lower == 'redhat' and ansible_distribution_major_version == "7"
+- name: Install Icinga Director
   git:
     repo: https://github.com/Icinga/icingaweb2-module-director.git
     dest: /usr/share/icingaweb2/modules/director
@@ -19,3 +24,80 @@
     repo: https://github.com/Icinga/icingaweb2-module-incubator.git
     dest: /usr/share/icingaweb2/modules/incubator
     version: "{{ icinga_incubator_version }}"
+- name: enable Director and dependecies
+  shell: "icingacli module enable {{ item }}"
+  with_items:
+    - ipl
+    - reactbundle
+    - incubator
+    - director
+  args:
+    creates: /etc/icingaweb2/enabledModules/{{ item }}
+- name: Create Director configuration directory
+  file:
+    state: directory
+    path: /etc/icingaweb2/modules/director
+    owner: "{{ icinga_apache_user }}"
+    group: "{{ icinga_web_group }}"
+    mode: 2770
+- name: Configure Director to use its resource
+  template:
+    src: director-config.ini.j2
+    dest: /etc/icingaweb2/modules/director/config.ini
+    owner: "{{ icinga_apache_user }}"
+    group: "{{ icinga_web_group }}"
+    mode: 0660
+- name: Check for pending Director schema migrations
+  shell: icingacli director migration pending
+  changed_when: false
+  register: director_pending
+  failed_when: false
+- name: Run pending Director migrations
+  shell: icingacli director migration run
+  when: director_pending.rc == 0
+- name: Create Director user
+  user:
+    name: icingadirector
+    group: "{{ icinga_web_group }}"
+    home: /var/lib/icingadirector
+    shell: /bin/false
+- name: Create home for Director user
+  file:
+    state: directory
+    path: /var/lib/icingadirector
+    mode: 0750
+    owner: icingadirector
+    group: "{{ icinga_web_group }}"
+- name: Create Director service
+  template:
+    src: director-service.j2
+    dest: /etc/systemd/system/icinga-director.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Reload Services
+- name: Configure connection to API
+  template:
+     src: director-api.conf.j2
+     dest: /etc/icingaweb2/modules/director/kickstart.ini
+     owner: root
+     group: icingaweb2
+     mode: 0640
+- name: flush handlers
+  meta: flush_handlers
+- name: Start Director Service
+  service:
+    name: icinga-director
+    state: started
+    enabled: yes
+- name: Check for pending Director kickstart
+  shell: icingacli director kickstart required
+  changed_when: false
+  register: director_kickstart_required
+  failed_when: false
+- name: Run required Kickstart
+  shell: icingacli director kickstart run
+  when: director_kickstart_required.rc == 0
+  notify:
+    - Deploy Director

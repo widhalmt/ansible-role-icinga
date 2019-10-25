@@ -2,8 +2,8 @@
 - name: Install MySQL IDO package
   package:
     name: icinga2-ido-mysql
-  notify:
-    - Import IDO MySQL schema
+    #  notify:
+    #    - Import IDO MySQL schema
 - name: Configure IDO connection
   template:
     src: ido-mysql.conf.j2
@@ -19,3 +19,13 @@
     creates: /etc/icinga2/features-enabled/ido-mysql.conf
   notify:
     - Restart Icinga
+- name: Check for IDO database schema
+  shell: mysql icinga -e 'SHOW TABLES' | wc -l
+  register: idostatus
+  changed_when: False
+- name: Import IDO Schema
+  mysql_db:
+    name: icinga
+    state: import
+    target: /usr/share/icinga2-ido-mysql/schema/mysql.sql
+  when: idostatus.stdout == "0"

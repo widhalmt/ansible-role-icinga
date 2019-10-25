@@ -98,5 +98,3 @@
   when: icinga_manage_config | bool
   notify:
     - Reload Icinga
-- import_tasks: director.yml
-  when: icinga_director | bool
