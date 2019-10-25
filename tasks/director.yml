@@ -39,7 +39,7 @@
     path: /etc/icingaweb2/modules/director
     owner: "{{ icinga_apache_user }}"
     group: "{{ icinga_web_group }}"
-    mode: 2770
+    mode: 0770
 - name: Configure Director to use its resource
   template:
     src: director-config.ini.j2
